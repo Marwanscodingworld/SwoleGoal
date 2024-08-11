@@ -154,25 +154,23 @@ function updateMealRecommendations() {
     const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
     let recommendedMeals = [];
 
-    function findMealCombinations(meals, targetCalories, currentCombination, usedMeals) {
+    function findMealCombinations(meals, targetCalories, currentCombination) {
         if (targetCalories <= 0) {
             recommendedMeals.push([...currentCombination]);
             return;
         }
 
         for (let i = 0; i < meals.length; i++) {
-            if (meals[i].calories <= targetCalories && !usedMeals.has(meals[i].name)) {
+            if (meals[i].calories <= targetCalories && !currentCombination.includes(meals[i])) {
                 currentCombination.push(meals[i]);
-                usedMeals.add(meals[i].name);  // Mark this meal as used
-                findMealCombinations(meals.slice(i + 1), targetCalories - meals[i].calories, currentCombination, usedMeals);
-                currentCombination.pop();
-                usedMeals.delete(meals[i].name);  // Unmark this meal for other combinations
+                findMealCombinations(meals.slice(i + 1), targetCalories - meals[i].calories, currentCombination);
+                currentCombination.pop();  // Remove last element to backtrack
             }
         }
     }
 
     // We consider combinations of meals to make up the remaining calories
-    findMealCombinations(mealOptions, remainingCalories, [], new Set());
+    findMealCombinations(mealOptions, remainingCalories, []);
 
     if (recommendedMeals.length > 0) {
         // Sort combinations by the number of meals (fewer meals is preferred) and by calories closest to target
@@ -188,6 +186,7 @@ function updateMealRecommendations() {
         document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
     }
 }
+
 
 
 // Initial graphs rendering
