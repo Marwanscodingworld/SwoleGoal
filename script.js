@@ -1,4 +1,4 @@
-let totalCalories = 4500; // Default goal, can be set by the user
+let totalCalories = 3000; // Default goal, can be set by the user
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
 let weightData = []; // Array to store weight data
@@ -32,7 +32,7 @@ function addCalories() {
         calorieData.push(consumedCalories);
         updateSummary();
         updateGraphs();
-        updateMealRecommendations();
+        updateMealRecommendations(); // Call to update meal recommendations
     }
 }
 
@@ -40,12 +40,15 @@ function updateSummary() {
     const remainingCalories = totalCalories - consumedCalories;
     document.getElementById('remainingCalories').innerText = `Remaining Calories: ${remainingCalories}`;
 
+    // Simulate current time as 8:00 PM for testing
     const currentTime = new Date();
+    currentTime.setHours(8, 0, 0); // 8:00 PM
+
     const endTime = new Date();
-    endTime.setHours(24, 0, 0); // 9 PM today
+    endTime.setHours(21, 0, 0); // 9 PM today
 
     const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
-    const caloriesPerHour = (remainingCalories > 0) ? remainingCalories / hoursRemaining : 0;
+    const caloriesPerHour = (remainingCalories > 0 && hoursRemaining > 0) ? remainingCalories / hoursRemaining : 0;
 
     document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: ${Math.round(caloriesPerHour)}`;
 }
@@ -55,7 +58,7 @@ function handleWorkout() {
     if (workedOut) {
         totalCalories += 300; // Example adjustment, can be dynamic
         updateSummary();
-        updateMealRecommendations();
+        updateMealRecommendations(); // Call to update meal recommendations
     }
 }
 
@@ -65,7 +68,7 @@ function trackWeight() {
         weightData.push(currentWeight);
         updateGraphs();
     }
-    const initialWeight = 55; // Example initial weight
+    const initialWeight = 70; // Example initial weight
     const weightChange = currentWeight - initialWeight;
     document.getElementById('weightProgress').innerText = `Progress since 12/07: ${weightChange} kg`;
 }
@@ -130,10 +133,10 @@ function updateGraph(canvasId, data, label) {
 function updateMealRecommendations() {
     const remainingCalories = totalCalories - consumedCalories;
 
-    // Use the actual current time for normal operation
+    // Simulate current time as 8:00 PM for testing
     const currentTime = new Date();
-    currentTime.setHours(8, 0, 0);
-    
+    currentTime.setHours(8, 0, 0); // 8:00 PM
+
     const endTime = new Date();
     endTime.setHours(21, 0, 0); // 9:00 PM
 
@@ -173,6 +176,7 @@ function updateMealRecommendations() {
     }
 }
 
-}
 // Initial graphs rendering
 updateGraphs();
+updateSummary(); // Ensure summary is updated on page load
+updateMealRecommendations(); // Ensure meal recommendations are shown on page load
