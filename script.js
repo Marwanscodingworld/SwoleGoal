@@ -129,9 +129,14 @@ function updateGraph(canvasId, data, label) {
 // Function to update meal recommendations based on remaining calories and time
 function updateMealRecommendations() {
     const remainingCalories = totalCalories - consumedCalories;
+
+    // Simulate the current time as 8:00 AM
     const currentTime = new Date();
+    currentTime.setHours(8, 0, 0); // 8:00 AM
+
+    // End time remains at 9:00 PM
     const endTime = new Date();
-    endTime.setHours(21, 0, 0); // 9 PM today
+    endTime.setHours(21, 0, 0); // 9:00 PM
 
     const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
     let recommendedMeals = [];
@@ -149,6 +154,5 @@ function updateMealRecommendations() {
         document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
     }
 }
-
 // Initial graphs rendering
 updateGraphs();
