@@ -231,9 +231,14 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
         let fallbackMeals = mealOptions.filter(meal => meal.calories <= remainingCalories);
         fallbackMeals.sort((a, b) => b.calories - a.calories); // Sort descending by calories
 
-        let fallbackMealText = fallbackMeals.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
-        document.getElementById('mealRecommendations').innerHTML = fallbackMealText.length > 0 ? fallbackMealText : "No suitable meals available. Consider adjusting your goal.";
-        projectedTotalCalories = totalCalories; // Default to the target goal if no suitable plan
+        if (fallbackMeals.length > 0) {
+            let fallbackMealText = fallbackMeals.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
+            document.getElementById('mealRecommendations').innerHTML = fallbackMealText;
+            projectedTotalCalories = totalCalories; // Default to the target goal if no suitable plan
+        } else {
+            document.getElementById('mealRecommendations').innerHTML = "No suitable meals available. Consider adjusting your goal.";
+            projectedTotalCalories = totalCalories; // Default to the target goal if no suitable plan
+        }
     } else {
         let mealText = recommendedMeals.map(({ meal, time }) => {
             return `${meal.name} - ${meal.calories} calories at ${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
@@ -281,5 +286,3 @@ function updateProgressBar(percentage) {
 // Initial setup
 resetRecommendations();
 updateGraphs();
-
-
