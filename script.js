@@ -1,4 +1,4 @@
-let totalCalories = 3500; // Default goal, can be set by the user
+let totalCalories = 3200; // Default goal, can be set by the user
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
 let weightData = []; // Array to store weight data
@@ -42,7 +42,6 @@ function addCalories() {
         calorieData.push(consumedCalories);
         updateSummary();
         updateGraphs();
-        updateMealRecommendations(); // Ensure meal recommendations are updated
     }
 }
 
@@ -62,7 +61,7 @@ function updateSummary() {
 
     document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: ${Math.round(caloriesPerHour)}`;
 
-    updateMealRecommendations(); // Ensure meal recommendations are updated after summary is updated
+    updateMealRecommendations(hoursRemaining); // Ensure meal recommendations are updated after summary is updated
 }
 
 function handleWorkout() {
@@ -141,21 +140,19 @@ function updateGraph(canvasId, data, label) {
 }
 
 // Function to update meal recommendations based on remaining calories and time
-function updateMealRecommendations() {
+function updateMealRecommendations(hoursRemaining) {
     const remainingCalories = totalCalories - consumedCalories;
 
-    // Simulate current time as 8:00 PM for testing
-    const currentTime = new Date();
-    currentTime.setHours(8, 0, 0); // 8:00 PM
+    // Determine the number of meals you should have left, assuming 1 meal every 2 hours
+    const mealsNeeded = Math.ceil(hoursRemaining / 2);
 
-    const endTime = new Date();
-    endTime.setHours(21, 0, 0); // 9:00 PM
+    // Calculate the target calories per meal
+    const targetCaloriesPerMeal = remainingCalories / mealsNeeded;
 
-    const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
     let recommendedMeals = [];
 
     function findMealCombinations(meals, targetCalories, currentCombination) {
-        if (targetCalories <= 0) {
+        if (currentCombination.length === mealsNeeded || targetCalories <= 0) {
             recommendedMeals.push([...currentCombination]);
             return;
         }
@@ -169,7 +166,7 @@ function updateMealRecommendations() {
         }
     }
 
-    // We consider combinations of meals to make up the remaining calories
+    // Consider combinations of meals to make up the remaining calories
     findMealCombinations(mealOptions, remainingCalories, []);
 
     if (recommendedMeals.length > 0) {
