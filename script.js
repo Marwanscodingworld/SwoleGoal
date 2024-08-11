@@ -64,6 +64,7 @@ function updateSummary() {
     const [hours, minutes] = currentTimeInput.split(':');
     currentTime.setHours(parseInt(hours), parseInt(minutes), 0);
 
+    // Set the target end time between 7 PM and 9 PM
     const endTime = new Date();
     endTime.setHours(21, 0, 0); // 9 PM today
 
@@ -199,8 +200,8 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
 
     recommendedMeals = calculateMealTimings(mealsNeeded, remainingCalories);
 
-    // Handle the case where dynamic adjustments couldn't fulfill the goal
-    if (recommendedMeals.length < mealsNeeded) {
+    // Ensure a suitable meal plan is always generated
+    while (recommendedMeals.length < mealsNeeded) {
         recommendedMeals = calculateMealTimings(Math.max(1, mealsNeeded - 1), remainingCalories);
     }
 
