@@ -6,6 +6,22 @@
     <title>Calorie Tracker</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #calorieProgressBarContainer {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        #calorieProgressBar {
+            height: 20px;
+            width: 0%;
+            background: yellow;
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out, background 0.5s ease-in-out;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -50,6 +66,10 @@
             <p id="remainingCalories">Remaining Calories: </p>
             <p id="caloriesPerHour">Calories Per Hour Required: </p>
             <p id="projectedCalories">Projected Total Calories: N/A</p>
+            <!-- Progress bar -->
+            <div id="calorieProgressBarContainer">
+                <div id="calorieProgressBar"></div>
+            </div>
         </div>
 
         <!-- Workout section -->
@@ -92,3 +112,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
