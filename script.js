@@ -1,7 +1,7 @@
 let totalCalories = 3500; // Default goal set to 3500 calories
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
-let loggedMeals = []; // Array to store logged meals with time
+let loggedMeals = []; // Array to store logged meals with time, name, and type
 let recommendedMealsHistory = []; // Array to track recommended meals
 let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
@@ -47,11 +47,15 @@ function addCalories() {
         const [hours, minutes] = inputTime.split(':');
         inputTimeDate.setHours(parseInt(hours), parseInt(minutes), 0);
 
-        consumedCalories += parseInt(inputCalories);
+        const calories = parseInt(inputCalories);
+        consumedCalories += calories;
         calorieData.push(consumedCalories);
-        loggedMeals.push({ time: inputTimeDate, calories: parseInt(inputCalories) });
+
+        const mealType = calories >= 500 ? "Big Meal" : "Small Meal";
+        loggedMeals.push({ type: mealType, calories: calories, time: inputTimeDate });
 
         updateSummary();
+        updateMealLogTable(); // Update the meal log table
         updateGraphs();
     }
 }
@@ -63,6 +67,7 @@ function resetRecommendations() {
     recommendedMealsHistory = [];
     document.getElementById('mealRecommendations').innerHTML = "No recommendations yet.";
     document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
+    updateMealLogTable(); // Clear the meal log table
 }
 
 function updateSummary() {
@@ -209,11 +214,14 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
     recommendedMeals = calculateMealTimings(mealsRemaining, remainingCalories);
 
     // Ensure a suitable meal plan is always generated
-    while (recommendedMeals.length < mealsRemaining) {
-        recommendedMeals = calculateMealTimings(Math.max(1, mealsRemaining - 1), remainingCalories);
-    }
+    if (recommendedMeals.length < mealsRemaining) {
+        let fallbackMeals = mealOptions.filter(meal => meal.calories <= remainingCalories);
+        fallbackMeals.sort((a, b) => b.calories - a.calories); // Sort descending by calories
 
-    if (recommendedMeals.length > 0) {
+        let fallbackMealText = fallbackMeals.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
+        document.getElementById('mealRecommendations').innerHTML = fallbackMealText.length > 0 ? fallbackMealText : "No suitable meals available. Consider adjusting your goal.";
+        document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
+    } else {
         let projectedTotalCalories = consumedCalories;
         let mealText = recommendedMeals.map(({ meal, time }) => {
             projectedTotalCalories += meal.calories;
@@ -222,10 +230,32 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
         
         document.getElementById('mealRecommendations').innerHTML = mealText;
         document.getElementById('projectedCalories').innerText = `Projected Total Calories: ${projectedTotalCalories}`;
-    } else {
-        document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
-        document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
     }
+}
+
+// Function to update the meal log table
+function updateMealLogTable() {
+    const tableBody = document.getElementById('mealLogTableBody');
+    tableBody.innerHTML = ""; // Clear existing table rows
+
+    loggedMeals.forEach((meal, index) => {
+        const row = document.createElement('tr');
+        const mealNumberCell = document.createElement('td');
+        mealNumberCell.innerText = `Meal ${index + 1}`;
+        const mealTypeCell = document.createElement('td');
+        mealTypeCell.innerText = meal.type;
+        const caloriesCell = document.createElement('td');
+        caloriesCell.innerText = meal.calories;
+        const timeCell = document.createElement('td');
+        timeCell.innerText = `${meal.time.getHours()}:${meal.time.getMinutes().toString().padStart(2, '0')}`;
+
+        row.appendChild(mealNumberCell);
+        row.appendChild(mealTypeCell);
+        row.appendChild(caloriesCell);
+        row.appendChild(timeCell);
+
+        tableBody.appendChild(row);
+    });
 }
 
 // Initial setup
