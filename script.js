@@ -20,7 +20,9 @@ const mealOptions = [
     { name: 'Salmon with Rice', calories: 750 },
     { name: 'Spaghetti and Meatballs', calories: 700 },
     { name: 'Mac and Cheese', calories: 800 },
-    { name: 'Burger', calories: 500 }
+    { name: 'Burger', calories: 500 },
+    {name: 'protein shake', calories: 400  },
+    {name: 'chicken tenders', calories: 300  } 
 ];
 
 // Small item options (new items only)
