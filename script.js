@@ -1,6 +1,7 @@
-let totalCalories = 4200; // Default goal, can be set by the user
+let totalCalories = 2000; // Default goal, can be set by the user
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
+let timePeriod = 'week'; // Default time period for the graph
 
 function setCalorieGoal() {
     const goalInput = document.getElementById('calorieGoalInput').value;
@@ -49,16 +50,36 @@ function trackWeight() {
     document.getElementById('weightProgress').innerText = `Progress since 12/07: ${weightChange} kg`;
 }
 
-// Function to update the graph with calorie data
+// Function to update the graph with calorie data based on selected time period
 function updateGraph() {
+    timePeriod = document.getElementById('timePeriodSelect').value;
+
+    let filteredData = [];
+    let labels = [];
+
+    const daysInPeriod = {
+        'week': 7,
+        'twoWeeks': 14,
+        'month': 30,
+        'threeMonths': 90
+    };
+
+    const daysToShow = daysInPeriod[timePeriod];
+    const startIndex = Math.max(0, calorieData.length - daysToShow);
+    
+    for (let i = startIndex; i < calorieData.length; i++) {
+        filteredData.push(calorieData[i]);
+        labels.push(`Day ${i + 1}`);
+    }
+
     const ctx = document.getElementById('progressChart').getContext('2d');
-    const chart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'line',
         data: {
-            labels: calorieData.map((_, index) => `Meal ${index + 1}`), // X-axis labels
+            labels: labels,
             datasets: [{
-                label: 'Calorie Intake Over Time',
-                data: calorieData, // Y-axis data
+                label: `Calorie Intake (${timePeriod})`,
+                data: filteredData,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 2,
                 fill: false,
@@ -70,7 +91,7 @@ function updateGraph() {
                 x: {
                     title: {
                         display: true,
-                        text: 'Meals'
+                        text: 'Days'
                     }
                 },
                 y: {
@@ -84,3 +105,6 @@ function updateGraph() {
         }
     });
 }
+
+// Initial graph rendering
+updateGraph();
