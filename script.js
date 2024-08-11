@@ -33,6 +33,7 @@ function setCalorieGoal() {
     const goalInput = document.getElementById('calorieGoalInput').value;
     if (goalInput) {
         totalCalories = parseInt(goalInput);
+        resetRecommendations();
         updateSummary();
     }
 }
@@ -49,32 +50,44 @@ function addCalories() {
         calorieData.push(consumedCalories);
         loggedMeals.push({ time: inputTimeDate, calories: parseInt(inputCalories) });
 
-        updateSummary(inputTimeDate);
+        updateSummary();
         updateGraphs();
     }
 }
 
-function updateSummary(currentTime) {
+function resetRecommendations() {
+    consumedCalories = 0;
+    calorieData = [];
+    loggedMeals = [];
+    recommendedMealsHistory = [];
+    document.getElementById('mealRecommendations').innerHTML = "No recommendations yet.";
+}
+
+function updateSummary() {
     const remainingCalories = totalCalories - consumedCalories;
     document.getElementById('remainingCalories').innerText = `Remaining Calories: ${remainingCalories}`;
 
-    // Set the target end time between 7 PM and 9 PM
-    const endTime = new Date();
-    endTime.setHours(21, 0, 0); // 9 PM today
+    if (loggedMeals.length > 0) {
+        const lastMealTime = loggedMeals[loggedMeals.length - 1].time;
+        const endTime = new Date(lastMealTime);
+        endTime.setHours(21, 0, 0); // Target end time 9 PM
 
-    const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
-    const caloriesPerHour = (remainingCalories > 0 && hoursRemaining > 0) ? remainingCalories / hoursRemaining : 0;
+        const hoursRemaining = (endTime - lastMealTime) / (1000 * 60 * 60);
+        const caloriesPerHour = (remainingCalories > 0 && hoursRemaining > 0) ? remainingCalories / hoursRemaining : 0;
 
-    document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: ${Math.round(caloriesPerHour)}`;
+        document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: ${Math.round(caloriesPerHour)}`;
 
-    updateMealRecommendations(currentTime, endTime, hoursRemaining); // Ensure meal recommendations are updated after summary is updated
+        updateMealRecommendations(lastMealTime, endTime, hoursRemaining);
+    } else {
+        document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: N/A`;
+    }
 }
 
 function handleWorkout() {
     const workedOut = document.getElementById('workoutCheck').checked;
     if (workedOut) {
         totalCalories += 300; // Example adjustment, can be dynamic
-        updateSummary(new Date()); // Use the current date for time update
+        updateSummary();
     }
 }
 
@@ -146,7 +159,7 @@ function updateGraph(canvasId, data, label) {
 }
 
 // Function to update meal recommendations based on remaining calories and time
-function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
+function updateMealRecommendations(lastMealTime, endTime, hoursRemaining) {
     const remainingCalories = totalCalories - consumedCalories;
 
     // Dynamically calculate the number of meals needed based on remaining time and calories
@@ -159,9 +172,6 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
     // Calculate the target calories per meal dynamically
     function calculateMealTimings(mealsNeeded, remainingCalories) {
         let targetCaloriesPerMeal = remainingCalories / mealsNeeded;
-
-        // Adjust meal frequency dynamically based on time left and calories remaining
-        let lastMealTime = loggedMeals.length > 0 ? loggedMeals[loggedMeals.length - 1].time : currentTime;
 
         for (let i = 0; i < mealsNeeded; i++) {
             let mealTime = new Date(lastMealTime.getTime());
@@ -209,6 +219,6 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
     }
 }
 
-// Initial graphs and recommendations rendering
+// Initial setup
+resetRecommendations();
 updateGraphs();
-updateSummary(new Date()); // Ensure summary is updated on page load
