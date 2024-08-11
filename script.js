@@ -14,8 +14,19 @@ const mealOptions = [
     { name: 'Granola Bar', calories: 200 },
     { name: 'Bacon and Eggs', calories: 350 },
     { name: 'Pasta with Alfredo Sauce', calories: 600 },
-    { name: 'Avocado Toast', calories: 300 }
+    { name: 'Avocado Toast', calories: 300 },
+    { name: 'Lasagna', calories: 850 },
+    { name: 'Steak and Potatoes', calories: 1000 },
+    { name: 'Chicken Alfredo', calories: 700 },
+    { name: 'BBQ Ribs', calories: 1200 },
+    { name: 'Fried Chicken with Sides', calories: 900 },
+    { name: 'Mac and Cheese', calories: 800 },
+    { name: 'Salmon with Rice', calories: 750 },
+    { name: 'Beef Burrito', calories: 950 },
+    { name: 'Cheeseburger and Fries', calories: 1100 },
+    { name: 'Spaghetti and Meatballs', calories: 700 }
 ];
+
 
 function setCalorieGoal() {
     const goalInput = document.getElementById('calorieGoalInput').value;
@@ -143,23 +154,25 @@ function updateMealRecommendations() {
     const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
     let recommendedMeals = [];
 
-    function findMealCombinations(meals, targetCalories, currentCombination) {
+    function findMealCombinations(meals, targetCalories, currentCombination, usedMeals) {
         if (targetCalories <= 0) {
             recommendedMeals.push([...currentCombination]);
             return;
         }
 
         for (let i = 0; i < meals.length; i++) {
-            if (meals[i].calories <= targetCalories) {
+            if (meals[i].calories <= targetCalories && !usedMeals.has(meals[i].name)) {
                 currentCombination.push(meals[i]);
-                findMealCombinations(meals.slice(i), targetCalories - meals[i].calories, currentCombination);
+                usedMeals.add(meals[i].name);  // Mark this meal as used
+                findMealCombinations(meals.slice(i + 1), targetCalories - meals[i].calories, currentCombination, usedMeals);
                 currentCombination.pop();
+                usedMeals.delete(meals[i].name);  // Unmark this meal for other combinations
             }
         }
     }
 
     // We consider combinations of meals to make up the remaining calories
-    findMealCombinations(mealOptions, remainingCalories, []);
+    findMealCombinations(mealOptions, remainingCalories, [], new Set());
 
     if (recommendedMeals.length > 0) {
         // Sort combinations by the number of meals (fewer meals is preferred) and by calories closest to target
@@ -175,6 +188,7 @@ function updateMealRecommendations() {
         document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
     }
 }
+
 
 // Initial graphs rendering
 updateGraphs();
