@@ -5,9 +5,9 @@ let loggedMeals = []; // Array to store logged meals with time, name, and type
 let recommendedMealsHistory = []; // Array to track recommended meals
 let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
-let bigMealCount = 0; // Track the number of big meals
+const targetMealCount = 5; // Target total meal count
 
-// Original meal options (no changes)
+// Example high-calorie meal options
 const mealOptions = [
     { name: 'BBQ Ribs', calories: 1200 },
     { name: 'Steak and Potatoes', calories: 1000 },
@@ -20,19 +20,14 @@ const mealOptions = [
     { name: 'Salmon with Rice', calories: 750 },
     { name: 'Spaghetti and Meatballs', calories: 700 },
     { name: 'Mac and Cheese', calories: 800 },
+    { name: 'Peanut Butter Sandwich', calories: 300 },
+    { name: 'Avocado Toast', calories: 300 },
+    { name: 'Protein Shake', calories: 400 },
+    { name: 'Cheese Pizza Slice', calories: 285 },
+    { name: 'Chocolate Bar', calories: 250 },
     { name: 'Burger', calories: 500 },
-    {name: 'protein shake', calories: 400  },
-    {name: 'chicken tenders', calories: 300  } 
-];
-
-// Small item options (new items only)
-const smallItemOptions = [
-    { name: 'Glass of Milk', calories: 150 },
-    { name: 'Apple', calories: 95 },
-    { name: 'Banana', calories: 105 },
-    { name: 'Yogurt', calories: 110 },
-    { name: 'Carrot Sticks', calories: 50 },
-    { name: 'Hard-Boiled Egg', calories: 78 }
+    { name: 'Granola Bar', calories: 200 },
+    { name: 'Bacon and Eggs', calories: 350 }
 ];
 
 function setCalorieGoal() {
@@ -57,9 +52,6 @@ function addCalories() {
         calorieData.push(consumedCalories);
 
         const mealType = calories >= 500 ? "Big Meal" : "Small Meal";
-        if (mealType === "Big Meal") {
-            bigMealCount += 1;
-        }
         loggedMeals.push({ type: mealType, calories: calories, time: inputTimeDate });
 
         updateSummary();
@@ -73,9 +65,7 @@ function resetRecommendations() {
     calorieData = [];
     loggedMeals = [];
     recommendedMealsHistory = [];
-    bigMealCount = 0;
     document.getElementById('mealRecommendations').innerHTML = "No recommendations yet.";
-    document.getElementById('smallItemRecommendations').innerHTML = "";
     document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
     updateMealLogTable(); // Clear the meal log table
     updateProgressBar(0); // Reset the progress bar
@@ -184,8 +174,8 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
     const remainingCalories = totalCalories - consumedCalories;
 
     // Dynamically calculate the number of meals needed based on remaining time and calories
-    let minCaloriesPerMeal = bigMealCount >= 3 ? 0 : 300;
-    let maxCaloriesPerMeal = bigMealCount >= 3 ? 500 : 1000;
+    let minCaloriesPerMeal = 300;
+    let maxCaloriesPerMeal = 1000;
 
     let recommendedMeals = [];
     let projectedTotalCalories = consumedCalories;
@@ -242,10 +232,6 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
         document.getElementById('mealRecommendations').innerHTML = mealText;
     }
 
-    // Update the small items list alongside the meal recommendations
-    const smallItemsText = smallItemOptions.map(item => `${item.name} - ${item.calories} calories`).join('<br>');
-    document.getElementById('smallItemRecommendations').innerHTML = smallItemsText;
-
     document.getElementById('projectedCalories').innerText = `Projected Total Calories: ${projectedTotalCalories}`;
     updateProgressBar((consumedCalories / projectedTotalCalories) * 100);
 }
@@ -285,3 +271,4 @@ function updateProgressBar(percentage) {
 // Initial setup
 resetRecommendations();
 updateGraphs();
+
