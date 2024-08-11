@@ -130,29 +130,49 @@ function updateGraph(canvasId, data, label) {
 function updateMealRecommendations() {
     const remainingCalories = totalCalories - consumedCalories;
 
-    // Simulate the current time as 8:00 AM
+    // Use the actual current time for normal operation
     const currentTime = new Date();
-    currentTime.setHours(8, 0, 0); // 8:00 AM
-
-    // End time remains at 9:00 PM
+    currentTime.setHours(8, 0, 0);
+    
     const endTime = new Date();
     endTime.setHours(21, 0, 0); // 9:00 PM
 
     const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
     let recommendedMeals = [];
 
-    mealOptions.forEach(meal => {
-        if (meal.calories <= remainingCalories && meal.calories >= (remainingCalories / hoursRemaining)) {
-            recommendedMeals.push(meal);
+    function findMealCombinations(meals, targetCalories, currentCombination) {
+        if (targetCalories <= 0) {
+            recommendedMeals.push([...currentCombination]);
+            return;
         }
-    });
+
+        for (let i = 0; i < meals.length; i++) {
+            if (meals[i].calories <= targetCalories) {
+                currentCombination.push(meals[i]);
+                findMealCombinations(meals.slice(i), targetCalories - meals[i].calories, currentCombination);
+                currentCombination.pop();
+            }
+        }
+    }
+
+    // We consider combinations of meals to make up the remaining calories
+    findMealCombinations(mealOptions, remainingCalories, []);
 
     if (recommendedMeals.length > 0) {
-        const mealText = recommendedMeals.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
+        // Sort combinations by the number of meals (fewer meals is preferred) and by calories closest to target
+        recommendedMeals.sort((a, b) => a.length - b.length || 
+            Math.abs(remainingCalories - a.reduce((sum, meal) => sum + meal.calories, 0)) - 
+            Math.abs(remainingCalories - b.reduce((sum, meal) => sum + meal.calories, 0)));
+
+        // Take the best combination (the first one after sorting)
+        const bestCombination = recommendedMeals[0];
+        const mealText = bestCombination.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
         document.getElementById('mealRecommendations').innerHTML = mealText;
     } else {
         document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
     }
+}
+
 }
 // Initial graphs rendering
 updateGraphs();
