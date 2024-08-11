@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <h1>Calorie Tracker</h1>
-        
+
         <!-- Section for setting calorie goal -->
         <div class="goal-section">
             <h2>Set Your Daily Calorie Goal</h2>
@@ -18,11 +18,18 @@
             <button onclick="setCalorieGoal()">Set Goal</button>
         </div>
 
-        <!-- Input section for logging meals -->
+        <!-- Section for logging meals -->
         <div class="input-section">
             <h2>Log Your Meals</h2>
             <input type="number" id="caloriesInput" placeholder="Enter calories">
             <button onclick="addCalories()">Add</button>
+        </div>
+
+        <!-- Section for current time input -->
+        <div class="time-section">
+            <h2>Set Current Time (HH:MM)</h2>
+            <input type="time" id="currentTimeInput" value="08:00">
+            <button onclick="updateSummary()">Update Time</button>
         </div>
 
         <!-- Output section for remaining calories and calories per hour -->
@@ -32,7 +39,7 @@
             <p id="caloriesPerHour">Calories Per Hour Required: </p>
         </div>
 
-        <!-- Workout checkbox section -->
+        <!-- Workout section -->
         <div class="workout-section">
             <h2>Workout</h2>
             <label for="workoutCheck">Did you work out today?</label>
@@ -47,7 +54,7 @@
             <p id="weightProgress">Progress since 12/07: </p>
         </div>
 
-        <!-- Graph section for displaying calorie and weight progress -->
+        <!-- Graph section -->
         <div class="graph-section">
             <h2>Progress Graphs</h2>
             <label for="timePeriodSelect">Select Time Period:</label>
