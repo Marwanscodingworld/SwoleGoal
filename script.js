@@ -160,7 +160,7 @@ function updateMealRecommendations(hoursRemaining) {
 
     // Categorize meals
     mealOptions.forEach(meal => {
-        if (meal.calories >= 600) {
+        if (meal.calories >= 500) {
             bigMealOptions.push(meal);
         } else {
             smallMealOptions.push(meal);
@@ -197,12 +197,19 @@ function updateMealRecommendations(hoursRemaining) {
         }
     }
 
+    // Incorporate logged food into the recommendation
+    const loggedBigMeals = calorieData.filter(cal => cal >= 500).length;
+    const loggedSmallMeals = calorieData.filter(cal => cal < 500 && cal > 0).length;
+
+    const remainingBigMeals = Math.max(bigMealsNeeded - loggedBigMeals, 0);
+    const remainingSmallMeals = Math.max(smallMealsNeeded - loggedSmallMeals, 0);
+
     // Find big meal combinations
-    findBigMealCombinations(bigMealOptions, bigMealsNeeded, targetBigMealCalories * bigMealsNeeded, []);
+    findBigMealCombinations(bigMealOptions, remainingBigMeals, targetBigMealCalories * remainingBigMeals, []);
 
     // If big meals are found, look for small meal combinations
     if (recommendedMeals.length > 0) {
-        findSmallMealCombinations(smallMealOptions, smallMealsNeeded, targetSmallMealCalories * smallMealsNeeded, recommendedMeals[0]);
+        findSmallMealCombinations(smallMealOptions, remainingSmallMeals, targetSmallMealCalories * remainingSmallMeals, recommendedMeals[0]);
     }
 
     if (recommendedMeals.length > 0) {
