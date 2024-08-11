@@ -1,4 +1,4 @@
-let totalCalories = 3000; // Default goal, can be set by the user
+let totalCalories = 3500; // Default goal, can be set by the user
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
 let weightData = []; // Array to store weight data
@@ -27,7 +27,6 @@ const mealOptions = [
     { name: 'Spaghetti and Meatballs', calories: 700 }
 ];
 
-
 function setCalorieGoal() {
     const goalInput = document.getElementById('calorieGoalInput').value;
     if (goalInput) {
@@ -43,7 +42,7 @@ function addCalories() {
         calorieData.push(consumedCalories);
         updateSummary();
         updateGraphs();
-        updateMealRecommendations(); // Call to update meal recommendations
+        updateMealRecommendations(); // Ensure meal recommendations are updated
     }
 }
 
@@ -62,6 +61,8 @@ function updateSummary() {
     const caloriesPerHour = (remainingCalories > 0 && hoursRemaining > 0) ? remainingCalories / hoursRemaining : 0;
 
     document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: ${Math.round(caloriesPerHour)}`;
+
+    updateMealRecommendations(); // Ensure meal recommendations are updated after summary is updated
 }
 
 function handleWorkout() {
@@ -69,7 +70,6 @@ function handleWorkout() {
     if (workedOut) {
         totalCalories += 300; // Example adjustment, can be dynamic
         updateSummary();
-        updateMealRecommendations(); // Call to update meal recommendations
     }
 }
 
@@ -187,9 +187,6 @@ function updateMealRecommendations() {
     }
 }
 
-
-
-// Initial graphs rendering
+// Initial graphs and recommendations rendering
 updateGraphs();
 updateSummary(); // Ensure summary is updated on page load
-updateMealRecommendations(); // Ensure meal recommendations are shown on page load
