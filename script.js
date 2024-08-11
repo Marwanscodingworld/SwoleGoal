@@ -49,9 +49,11 @@ function updateSummary() {
     const remainingCalories = totalCalories - consumedCalories;
     document.getElementById('remainingCalories').innerText = `Remaining Calories: ${remainingCalories}`;
 
-    // Simulate current time as 8:00 AM for testing
+    // Use the current time from the input box
+    const currentTimeInput = document.getElementById('currentTimeInput').value;
     const currentTime = new Date();
-    currentTime.setHours(8, 0, 0); // 8:00 AM
+    const [hours, minutes] = currentTimeInput.split(':');
+    currentTime.setHours(parseInt(hours), parseInt(minutes), 0);
 
     const endTime = new Date();
     endTime.setHours(21, 0, 0); // 9 PM today
