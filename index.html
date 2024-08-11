@@ -11,27 +11,35 @@
     <div class="container">
         <h1>Calorie Tracker</h1>
         
+        <!-- Section for setting calorie goal -->
         <div class="goal-section">
             <h2>Set Your Daily Calorie Goal</h2>
             <input type="number" id="calorieGoalInput" placeholder="Enter calorie goal">
             <button onclick="setCalorieGoal()">Set Goal</button>
         </div>
 
+        <!-- Input section for logging meals -->
         <div class="input-section">
             <h2>Log Your Meals</h2>
             <input type="number" id="caloriesInput" placeholder="Enter calories">
             <button onclick="addCalories()">Add</button>
         </div>
+
+        <!-- Output section for remaining calories and calories per hour -->
         <div class="output-section">
             <h2>Summary</h2>
             <p id="remainingCalories">Remaining Calories: </p>
             <p id="caloriesPerHour">Calories Per Hour Required: </p>
         </div>
+
+        <!-- Workout checkbox section -->
         <div class="workout-section">
             <h2>Workout</h2>
             <label for="workoutCheck">Did you work out today?</label>
             <input type="checkbox" id="workoutCheck" onchange="handleWorkout()">
         </div>
+
+        <!-- Weight tracking section -->
         <div class="progress-section">
             <h2>Track Progress</h2>
             <input type="number" id="weightInput" placeholder="Enter your weight">
@@ -39,6 +47,7 @@
             <p id="weightProgress">Progress since 12/07: </p>
         </div>
 
+        <!-- Graph section for displaying calorie and weight progress -->
         <div class="graph-section">
             <h2>Progress Graphs</h2>
             <label for="timePeriodSelect">Select Time Period:</label>
@@ -54,7 +63,7 @@
             <canvas id="weightChart" width="400" height="200"></canvas>
         </div>
 
-        <!-- New section for meal recommendations -->
+        <!-- Meal recommendation section -->
         <div class="meal-recommendation-section">
             <h2>Meal Recommendations</h2>
             <p id="mealRecommendations">No recommendations yet.</p>
