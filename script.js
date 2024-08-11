@@ -1,7 +1,21 @@
-let totalCalories = 2000; // Default goal, can be set by the user
+let totalCalories = 4500; // Default goal, can be set by the user
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
-let timePeriod = 'week'; // Default time period for the graph
+let weightData = []; // Array to store weight data
+let timePeriod = 'week'; // Default time period for the graphs
+
+// Example high-calorie meal options
+const mealOptions = [
+    { name: 'Peanut Butter Sandwich', calories: 300 },
+    { name: 'Protein Shake', calories: 400 },
+    { name: 'Cheese Pizza Slice', calories: 285 },
+    { name: 'Chocolate Bar', calories: 250 },
+    { name: 'Burger', calories: 500 },
+    { name: 'Granola Bar', calories: 200 },
+    { name: 'Bacon and Eggs', calories: 350 },
+    { name: 'Pasta with Alfredo Sauce', calories: 600 },
+    { name: 'Avocado Toast', calories: 300 }
+];
 
 function setCalorieGoal() {
     const goalInput = document.getElementById('calorieGoalInput').value;
@@ -17,7 +31,8 @@ function addCalories() {
         consumedCalories += parseInt(input);
         calorieData.push(consumedCalories);
         updateSummary();
-        updateGraph();
+        updateGraphs();
+        updateMealRecommendations();
     }
 }
 
@@ -40,22 +55,30 @@ function handleWorkout() {
     if (workedOut) {
         totalCalories += 300; // Example adjustment, can be dynamic
         updateSummary();
+        updateMealRecommendations();
     }
 }
 
 function trackWeight() {
     const currentWeight = document.getElementById('weightInput').value;
-    const initialWeight = 70; // Example initial weight
+    if (currentWeight) {
+        weightData.push(currentWeight);
+        updateGraphs();
+    }
+    const initialWeight = 55; // Example initial weight
     const weightChange = currentWeight - initialWeight;
     document.getElementById('weightProgress').innerText = `Progress since 12/07: ${weightChange} kg`;
 }
 
-// Function to update the graph with calorie data based on selected time period
-function updateGraph() {
+function updateGraphs() {
     timePeriod = document.getElementById('timePeriodSelect').value;
 
-    let filteredData = [];
-    let labels = [];
+    updateGraph('progressChart', calorieData, `Calorie Intake (${timePeriod})`);
+    updateGraph('weightChart', weightData, `Weight Progress (${timePeriod})`);
+}
+
+function updateGraph(canvasId, data, label) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
 
     const daysInPeriod = {
         'week': 7,
@@ -65,20 +88,17 @@ function updateGraph() {
     };
 
     const daysToShow = daysInPeriod[timePeriod];
-    const startIndex = Math.max(0, calorieData.length - daysToShow);
+    const startIndex = Math.max(0, data.length - daysToShow);
     
-    for (let i = startIndex; i < calorieData.length; i++) {
-        filteredData.push(calorieData[i]);
-        labels.push(`Day ${i + 1}`);
-    }
+    const filteredData = data.slice(startIndex);
+    const labels = filteredData.map((_, index) => `Day ${index + 1 + startIndex}`);
 
-    const ctx = document.getElementById('progressChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: `Calorie Intake (${timePeriod})`,
+                label: label,
                 data: filteredData,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 2,
@@ -97,7 +117,7 @@ function updateGraph() {
                 y: {
                     title: {
                         display: true,
-                        text: 'Calories'
+                        text: label.includes('Calorie') ? 'Calories' : 'Weight (kg)'
                     },
                     beginAtZero: true
                 }
@@ -106,5 +126,29 @@ function updateGraph() {
     });
 }
 
-// Initial graph rendering
-updateGraph();
+// Function to update meal recommendations based on remaining calories and time
+function updateMealRecommendations() {
+    const remainingCalories = totalCalories - consumedCalories;
+    const currentTime = new Date();
+    const endTime = new Date();
+    endTime.setHours(21, 0, 0); // 9 PM today
+
+    const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
+    let recommendedMeals = [];
+
+    mealOptions.forEach(meal => {
+        if (meal.calories <= remainingCalories && meal.calories >= (remainingCalories / hoursRemaining)) {
+            recommendedMeals.push(meal);
+        }
+    });
+
+    if (recommendedMeals.length > 0) {
+        const mealText = recommendedMeals.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
+        document.getElementById('mealRecommendations').innerHTML = mealText;
+    } else {
+        document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
+    }
+}
+
+// Initial graphs rendering
+updateGraphs();
