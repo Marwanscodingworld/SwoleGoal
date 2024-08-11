@@ -63,7 +63,7 @@ function updateSummary() {
 
     document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: ${Math.round(caloriesPerHour)}`;
 
-    updateMealRecommendations(hoursRemaining); // Ensure meal recommendations are updated after summary is updated
+    updateMealRecommendations(currentTime, endTime, hoursRemaining); // Ensure meal recommendations are updated after summary is updated
 }
 
 function handleWorkout() {
@@ -142,87 +142,53 @@ function updateGraph(canvasId, data, label) {
 }
 
 // Function to update meal recommendations based on remaining calories and time
-function updateMealRecommendations(hoursRemaining) {
+function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
     const remainingCalories = totalCalories - consumedCalories;
 
-    // Prioritize 3 big meals and 2 smaller meals (total 5 meals)
-    const bigMealsNeeded = 3;
-    const smallMealsNeeded = 2;
+    // Dynamically calculate the number of meals needed based on remaining time and calories
+    let mealsNeeded = Math.max(Math.floor(hoursRemaining / 2), 1);
+    let minCaloriesPerMeal = 300;
+    let maxCaloriesPerMeal = 1000;
 
-    // Target calories for big and small meals
-    const targetBigMealCalories = 800;  // Rough target for big meals
-    const targetSmallMealCalories = (remainingCalories - targetBigMealCalories * bigMealsNeeded) / smallMealsNeeded;
-
-    let bigMealOptions = [];
-    let smallMealOptions = [];
     let recommendedMeals = [];
 
-    // Sort meal options from largest to smallest for prioritizing big meals first
-    mealOptions.sort((a, b) => b.calories - a.calories);
+    // Calculate the target calories per meal dynamically
+    function calculateMealTimings(mealsNeeded, remainingCalories) {
+        let targetCaloriesPerMeal = remainingCalories / mealsNeeded;
 
-    // Categorize meals
-    mealOptions.forEach(meal => {
-        if (meal.calories >= 500) {
-            bigMealOptions.push(meal);
-        } else {
-            smallMealOptions.push(meal);
-        }
-    });
+        // Adjust meal frequency dynamically based on time left and calories remaining
+        for (let i = 0; i < mealsNeeded; i++) {
+            let mealTime = new Date(currentTime.getTime());
+            mealTime.setHours(currentTime.getHours() + i * (hoursRemaining / mealsNeeded));
 
-    function findBigMealCombinations(meals, mealsNeeded, targetCalories, currentCombination) {
-        if (currentCombination.length === mealsNeeded || targetCalories <= 0) {
-            recommendedMeals.push([...currentCombination]);
-            return;
-        }
+            let suitableMeals = mealOptions.filter(meal => meal.calories >= minCaloriesPerMeal && meal.calories <= maxCaloriesPerMeal);
+            suitableMeals.sort((a, b) => Math.abs(a.calories - targetCaloriesPerMeal) - Math.abs(b.calories - targetCaloriesPerMeal));
 
-        for (let i = 0; i < meals.length; i++) {
-            if (meals[i].calories <= targetCalories && !currentCombination.includes(meals[i])) {
-                currentCombination.push(meals[i]);
-                findBigMealCombinations(meals.slice(i + 1), mealsNeeded, targetCalories - meals[i].calories, currentCombination);
-                currentCombination.pop();  // Backtrack
+            if (suitableMeals.length > 0) {
+                let selectedMeal = suitableMeals[0];
+                remainingCalories -= selectedMeal.calories;
+                targetCaloriesPerMeal = remainingCalories / (mealsNeeded - (i + 1)); // Adjust target for remaining meals
+                recommendedMeals.push({
+                    meal: selectedMeal,
+                    time: mealTime
+                });
             }
         }
+
+        return recommendedMeals;
     }
 
-    function findSmallMealCombinations(meals, mealsNeeded, targetCalories, currentCombination) {
-        if (currentCombination.length === mealsNeeded || targetCalories <= 0) {
-            recommendedMeals.push([...currentCombination]);
-            return;
-        }
+    recommendedMeals = calculateMealTimings(mealsNeeded, remainingCalories);
 
-        for (let i = 0; i < meals.length; i++) {
-            if (meals[i].calories <= targetCalories && !currentCombination.includes(meals[i])) {
-                currentCombination.push(meals[i]);
-                findSmallMealCombinations(meals.slice(i + 1), mealsNeeded, targetCalories - meals[i].calories, currentCombination);
-                currentCombination.pop();  // Backtrack
-            }
-        }
-    }
-
-    // Incorporate logged food into the recommendation
-    const loggedBigMeals = calorieData.filter(cal => cal >= 500).length;
-    const loggedSmallMeals = calorieData.filter(cal => cal < 500 && cal > 0).length;
-
-    const remainingBigMeals = Math.max(bigMealsNeeded - loggedBigMeals, 0);
-    const remainingSmallMeals = Math.max(smallMealsNeeded - loggedSmallMeals, 0);
-
-    // Find big meal combinations
-    findBigMealCombinations(bigMealOptions, remainingBigMeals, targetBigMealCalories * remainingBigMeals, []);
-
-    // If big meals are found, look for small meal combinations
-    if (recommendedMeals.length > 0) {
-        findSmallMealCombinations(smallMealOptions, remainingSmallMeals, targetSmallMealCalories * remainingSmallMeals, recommendedMeals[0]);
+    // Handle the case where dynamic adjustments couldn't fulfill the goal
+    if (recommendedMeals.length < mealsNeeded) {
+        recommendedMeals = calculateMealTimings(Math.max(1, mealsNeeded - 1), remainingCalories);
     }
 
     if (recommendedMeals.length > 0) {
-        // Sort combinations by total calories closest to the remaining calories
-        recommendedMeals.sort((a, b) => 
-            Math.abs(remainingCalories - a.reduce((sum, meal) => sum + meal.calories, 0)) - 
-            Math.abs(remainingCalories - b.reduce((sum, meal) => sum + meal.calories, 0)));
-
-        // Take the best combination (the first one after sorting)
-        const bestCombination = recommendedMeals[0];
-        const mealText = bestCombination.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
+        let mealText = recommendedMeals.map(({ meal, time }) => 
+            `${meal.name} - ${meal.calories} calories at ${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`
+        ).join('<br>');
         document.getElementById('mealRecommendations').innerHTML = mealText;
     } else {
         document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
