@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Tracker</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Calorie Tracker</h1>
+        <div class="input-section">
+            <h2>Log Your Meals</h2>
+            <input type="number" id="caloriesInput" placeholder="Enter calories">
+            <button onclick="addCalories()">Add</button>
+        </div>
+        <div class="output-section">
+            <h2>Summary</h2>
+            <p id="remainingCalories">Remaining Calories: </p>
+            <p id="caloriesPerHour">Calories Per Hour Required: </p>
+        </div>
+        <div class="workout-section">
+            <h2>Workout</h2>
+            <label for="workoutCheck">Did you work out today?</label>
+            <input type="checkbox" id="workoutCheck" onchange="handleWorkout()">
+        </div>
+        <div class="progress-section">
+            <h2>Track Progress</h2>
+            <input type="number" id="weightInput" placeholder="Enter your weight">
+            <button onclick="trackWeight()">Track Weight</button>
+            <p id="weightProgress">Progress since 12/07: </p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
