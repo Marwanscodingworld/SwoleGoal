@@ -7,7 +7,7 @@ let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
 let bigMealCount = 0; // Track the number of big meals
 
-// Reverted meal options (including smaller items in a separate list)
+// Original meal options (no changes)
 const mealOptions = [
     { name: 'BBQ Ribs', calories: 1200 },
     { name: 'Steak and Potatoes', calories: 1000 },
@@ -23,14 +23,8 @@ const mealOptions = [
     { name: 'Burger', calories: 500 }
 ];
 
-// Small item options listed separately
+// Small item options (new items only)
 const smallItemOptions = [
-    { name: 'Peanut Butter Sandwich', calories: 300 },
-    { name: 'Avocado Toast', calories: 300 },
-    { name: 'Protein Shake', calories: 400 },
-    { name: 'Cheese Pizza Slice', calories: 285 },
-    { name: 'Chocolate Bar', calories: 250 },
-    { name: 'Granola Bar', calories: 200 },
     { name: 'Glass of Milk', calories: 150 },
     { name: 'Apple', calories: 95 },
     { name: 'Banana', calories: 105 },
@@ -188,8 +182,8 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
     const remainingCalories = totalCalories - consumedCalories;
 
     // Dynamically calculate the number of meals needed based on remaining time and calories
-    let minCaloriesPerMeal = 300;
-    let maxCaloriesPerMeal = 1000;
+    let minCaloriesPerMeal = bigMealCount >= 3 ? 0 : 300;
+    let maxCaloriesPerMeal = bigMealCount >= 3 ? 500 : 1000;
 
     let recommendedMeals = [];
     let projectedTotalCalories = consumedCalories;
