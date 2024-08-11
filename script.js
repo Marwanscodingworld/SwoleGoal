@@ -5,9 +5,9 @@ let loggedMeals = []; // Array to store logged meals with time, name, and type
 let recommendedMealsHistory = []; // Array to track recommended meals
 let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
-const targetMealCount = 5; // Target total meal count
+let bigMealCount = 0; // Track the number of big meals
 
-// Example high-calorie meal options
+// Updated meal options, including more small meals below 300 calories
 const mealOptions = [
     { name: 'BBQ Ribs', calories: 1200 },
     { name: 'Steak and Potatoes', calories: 1000 },
@@ -27,7 +27,13 @@ const mealOptions = [
     { name: 'Chocolate Bar', calories: 250 },
     { name: 'Burger', calories: 500 },
     { name: 'Granola Bar', calories: 200 },
-    { name: 'Bacon and Eggs', calories: 350 }
+    { name: 'Bacon and Eggs', calories: 350 },
+    { name: 'Glass of Milk', calories: 150 },
+    { name: 'Apple', calories: 95 },
+    { name: 'Banana', calories: 105 },
+    { name: 'Yogurt', calories: 110 },
+    { name: 'Carrot Sticks', calories: 50 },
+    { name: 'Hard-Boiled Egg', calories: 78 }
 ];
 
 function setCalorieGoal() {
@@ -52,6 +58,9 @@ function addCalories() {
         calorieData.push(consumedCalories);
 
         const mealType = calories >= 500 ? "Big Meal" : "Small Meal";
+        if (mealType === "Big Meal") {
+            bigMealCount += 1;
+        }
         loggedMeals.push({ type: mealType, calories: calories, time: inputTimeDate });
 
         updateSummary();
@@ -65,6 +74,7 @@ function resetRecommendations() {
     calorieData = [];
     loggedMeals = [];
     recommendedMealsHistory = [];
+    bigMealCount = 0;
     document.getElementById('mealRecommendations').innerHTML = "No recommendations yet.";
     document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
     updateMealLogTable(); // Clear the meal log table
@@ -174,8 +184,8 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
     const remainingCalories = totalCalories - consumedCalories;
 
     // Dynamically calculate the number of meals needed based on remaining time and calories
-    let minCaloriesPerMeal = 300;
-    let maxCaloriesPerMeal = 1000;
+    let minCaloriesPerMeal = bigMealCount >= 3 ? 0 : 300;
+    let maxCaloriesPerMeal = bigMealCount >= 3 ? 500 : 1000;
 
     let recommendedMeals = [];
     let projectedTotalCalories = consumedCalories;
@@ -271,4 +281,5 @@ function updateProgressBar(percentage) {
 // Initial setup
 resetRecommendations();
 updateGraphs();
+
 
