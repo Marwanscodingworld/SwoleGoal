@@ -2,6 +2,7 @@ let totalCalories = 3500; // Default goal set to 3500 calories
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
 let loggedMeals = []; // Array to store logged meals with time
+let recommendedMealsHistory = []; // Array to track recommended meals
 let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
 
@@ -171,7 +172,13 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
             let mealTime = new Date(lastMealTime.getTime());
             mealTime.setHours(lastMealTime.getHours() + Math.max(Math.floor(hoursRemaining / mealsNeeded), 1));
 
-            let suitableMeals = mealOptions.filter(meal => meal.calories >= minCaloriesPerMeal && meal.calories <= maxCaloriesPerMeal);
+            // Filter out meals that have already been recommended or logged
+            let suitableMeals = mealOptions.filter(meal => 
+                meal.calories >= minCaloriesPerMeal && 
+                meal.calories <= maxCaloriesPerMeal &&
+                !recommendedMealsHistory.includes(meal.name)
+            );
+
             suitableMeals.sort((a, b) => Math.abs(a.calories - targetCaloriesPerMeal) - Math.abs(b.calories - targetCaloriesPerMeal));
 
             if (suitableMeals.length > 0) {
@@ -182,6 +189,7 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
                     meal: selectedMeal,
                     time: mealTime
                 });
+                recommendedMealsHistory.push(selectedMeal.name); // Track recommended meals to avoid repeats
                 lastMealTime = mealTime; // Update last meal time
             }
         }
