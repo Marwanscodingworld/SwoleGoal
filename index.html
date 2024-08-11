@@ -5,10 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calorie Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Add Chart.js library -->
 </head>
 <body>
     <div class="container">
         <h1>Calorie Tracker</h1>
+        
+        <!-- Section for setting calorie goal -->
+        <div class="goal-section">
+            <h2>Set Your Daily Calorie Goal</h2>
+            <input type="number" id="calorieGoalInput" placeholder="Enter calorie goal">
+            <button onclick="setCalorieGoal()">Set Goal</button>
+        </div>
+
+        <!-- Existing sections -->
         <div class="input-section">
             <h2>Log Your Meals</h2>
             <input type="number" id="caloriesInput" placeholder="Enter calories">
@@ -29,6 +39,12 @@
             <input type="number" id="weightInput" placeholder="Enter your weight">
             <button onclick="trackWeight()">Track Weight</button>
             <p id="weightProgress">Progress since 12/07: </p>
+        </div>
+
+        <!-- Section for displaying the progress graph -->
+        <div class="graph-section">
+            <h2>Progress Graph</h2>
+            <canvas id="progressChart" width="400" height="200"></canvas>
         </div>
     </div>
     <script src="script.js"></script>
