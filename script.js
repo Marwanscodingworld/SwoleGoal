@@ -143,48 +143,71 @@ function updateGraph(canvasId, data, label) {
 function updateMealRecommendations(hoursRemaining) {
     const remainingCalories = totalCalories - consumedCalories;
 
-    // Determine the number of meals you should have left, assuming 1 meal every 2 hours
-    const mealsNeeded = Math.ceil(hoursRemaining / 2);
+    // Prioritize 3 big meals and 2 smaller meals (total 5 meals)
+    const bigMealsNeeded = 3;
+    const smallMealsNeeded = 2;
 
-    // Calculate the target calories per meal
-    let targetCaloriesPerMeal = remainingCalories / mealsNeeded;
+    // Target calories for big and small meals
+    const targetBigMealCalories = 800;  // Rough target for big meals
+    const targetSmallMealCalories = (remainingCalories - targetBigMealCalories * bigMealsNeeded) / smallMealsNeeded;
 
+    let bigMealOptions = [];
+    let smallMealOptions = [];
     let recommendedMeals = [];
 
-    function findMealCombinations(meals, targetCalories, currentCombination) {
+    // Sort meal options from largest to smallest for prioritizing big meals first
+    mealOptions.sort((a, b) => b.calories - a.calories);
+
+    // Categorize meals
+    mealOptions.forEach(meal => {
+        if (meal.calories >= 600) {
+            bigMealOptions.push(meal);
+        } else {
+            smallMealOptions.push(meal);
+        }
+    });
+
+    function findBigMealCombinations(meals, mealsNeeded, targetCalories, currentCombination) {
         if (currentCombination.length === mealsNeeded || targetCalories <= 0) {
-            // Only accept combinations within +-200 of the target
-            const totalCalories = currentCombination.reduce((sum, meal) => sum + meal.calories, 0);
-            if (Math.abs(remainingCalories - totalCalories) <= 200) {
-                recommendedMeals.push([...currentCombination]);
-            }
+            recommendedMeals.push([...currentCombination]);
             return;
         }
 
         for (let i = 0; i < meals.length; i++) {
             if (meals[i].calories <= targetCalories && !currentCombination.includes(meals[i])) {
                 currentCombination.push(meals[i]);
-                findMealCombinations(meals.slice(i + 1), targetCalories - meals[i].calories, currentCombination);
-                currentCombination.pop();  // Remove last element to backtrack
+                findBigMealCombinations(meals.slice(i + 1), mealsNeeded, targetCalories - meals[i].calories, currentCombination);
+                currentCombination.pop();  // Backtrack
             }
         }
     }
 
-    // Sort meal options from largest to smallest for priority
-    mealOptions.sort((a, b) => b.calories - a.calories);
+    function findSmallMealCombinations(meals, mealsNeeded, targetCalories, currentCombination) {
+        if (currentCombination.length === mealsNeeded || targetCalories <= 0) {
+            recommendedMeals.push([...currentCombination]);
+            return;
+        }
 
-    // Attempt to find combinations that meet the target calories per meal
-    findMealCombinations(mealOptions, targetCaloriesPerMeal * mealsNeeded, []);
+        for (let i = 0; i < meals.length; i++) {
+            if (meals[i].calories <= targetCalories && !currentCombination.includes(meals[i])) {
+                currentCombination.push(meals[i]);
+                findSmallMealCombinations(meals.slice(i + 1), mealsNeeded, targetCalories - meals[i].calories, currentCombination);
+                currentCombination.pop();  // Backtrack
+            }
+        }
+    }
 
-    if (recommendedMeals.length === 0) {
-        // Fallback: If no suitable combinations found, relax the requirements
-        targetCaloriesPerMeal = remainingCalories / Math.max(1, mealsNeeded);
-        findMealCombinations(mealOptions, targetCaloriesPerMeal * mealsNeeded, []);
+    // Find big meal combinations
+    findBigMealCombinations(bigMealOptions, bigMealsNeeded, targetBigMealCalories * bigMealsNeeded, []);
+
+    // If big meals are found, look for small meal combinations
+    if (recommendedMeals.length > 0) {
+        findSmallMealCombinations(smallMealOptions, smallMealsNeeded, targetSmallMealCalories * smallMealsNeeded, recommendedMeals[0]);
     }
 
     if (recommendedMeals.length > 0) {
-        // Sort combinations by the number of meals (fewer meals is preferred) and by calories closest to target
-        recommendedMeals.sort((a, b) => a.length - b.length || 
+        // Sort combinations by total calories closest to the remaining calories
+        recommendedMeals.sort((a, b) => 
             Math.abs(remainingCalories - a.reduce((sum, meal) => sum + meal.calories, 0)) - 
             Math.abs(remainingCalories - b.reduce((sum, meal) => sum + meal.calories, 0)));
 
