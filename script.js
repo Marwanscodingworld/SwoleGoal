@@ -68,6 +68,7 @@ function resetRecommendations() {
     document.getElementById('mealRecommendations').innerHTML = "No recommendations yet.";
     document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
     updateMealLogTable(); // Clear the meal log table
+    updateProgressBar(0); // Reset the progress bar
 }
 
 function updateSummary() {
@@ -177,6 +178,7 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
     let maxCaloriesPerMeal = 1000;
 
     let recommendedMeals = [];
+    let projectedTotalCalories = consumedCalories;
 
     // Calculate the target calories per meal dynamically
     function calculateMealTimings(mealsRemaining, remainingCalories) {
@@ -198,6 +200,7 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
             if (suitableMeals.length > 0) {
                 let selectedMeal = suitableMeals[0];
                 remainingCalories -= selectedMeal.calories;
+                projectedTotalCalories += selectedMeal.calories;
                 targetCaloriesPerMeal = remainingCalories / (mealsRemaining - (i + 1)); // Adjust target for remaining meals
                 recommendedMeals.push({
                     meal: selectedMeal,
@@ -220,17 +223,17 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsR
 
         let fallbackMealText = fallbackMeals.map(meal => `${meal.name} - ${meal.calories} calories`).join('<br>');
         document.getElementById('mealRecommendations').innerHTML = fallbackMealText.length > 0 ? fallbackMealText : "No suitable meals available. Consider adjusting your goal.";
-        document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
+        projectedTotalCalories = totalCalories; // Default to the target goal if no suitable plan
     } else {
-        let projectedTotalCalories = consumedCalories;
         let mealText = recommendedMeals.map(({ meal, time }) => {
-            projectedTotalCalories += meal.calories;
             return `${meal.name} - ${meal.calories} calories at ${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
         }).join('<br>');
         
         document.getElementById('mealRecommendations').innerHTML = mealText;
-        document.getElementById('projectedCalories').innerText = `Projected Total Calories: ${projectedTotalCalories}`;
     }
+
+    document.getElementById('projectedCalories').innerText = `Projected Total Calories: ${projectedTotalCalories}`;
+    updateProgressBar((consumedCalories / projectedTotalCalories) * 100);
 }
 
 // Function to update the meal log table
@@ -258,6 +261,14 @@ function updateMealLogTable() {
     });
 }
 
+// Function to update the progress bar
+function updateProgressBar(percentage) {
+    const progressBar = document.getElementById('calorieProgressBar');
+    progressBar.style.width = `${percentage}%`;
+    progressBar.style.background = `linear-gradient(90deg, yellow, red ${percentage}%)`;
+}
+
 // Initial setup
 resetRecommendations();
 updateGraphs();
+
