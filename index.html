@@ -39,17 +39,25 @@
             <p id="weightProgress">Progress since 12/07: </p>
         </div>
 
-        <!-- Dropdown menu for selecting the time period -->
         <div class="graph-section">
-            <h2>Progress Graph</h2>
+            <h2>Progress Graphs</h2>
             <label for="timePeriodSelect">Select Time Period:</label>
-            <select id="timePeriodSelect" onchange="updateGraph()">
+            <select id="timePeriodSelect" onchange="updateGraphs()">
                 <option value="week">1 Week</option>
                 <option value="twoWeeks">2 Weeks</option>
                 <option value="month">1 Month</option>
                 <option value="threeMonths">3 Months</option>
             </select>
+            <h3>Calorie Intake</h3>
             <canvas id="progressChart" width="400" height="200"></canvas>
+            <h3>Weight Progress</h3>
+            <canvas id="weightChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- New section for meal recommendations -->
+        <div class="meal-recommendation-section">
+            <h2>Meal Recommendations</h2>
+            <p id="mealRecommendations">No recommendations yet.</p>
         </div>
     </div>
     <script src="script.js"></script>
