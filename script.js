@@ -5,7 +5,7 @@ let loggedMeals = []; // Array to store logged meals with time, name, and type
 let recommendedMealsHistory = []; // Array to track recommended meals
 let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
-const targetMealCount = 8; // Target total meal count
+const targetMealCount = 5; // Target total meal count
 
 // Example high-calorie meal options
 const mealOptions = [
