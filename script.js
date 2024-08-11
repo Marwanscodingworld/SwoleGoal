@@ -1,4 +1,4 @@
-let totalCalories = 3200; // Default goal, can be set by the user
+let totalCalories = 3500; // Default goal set to 3500 calories
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
 let weightData = []; // Array to store weight data
@@ -6,25 +6,25 @@ let timePeriod = 'week'; // Default time period for the graphs
 
 // Example high-calorie meal options
 const mealOptions = [
+    { name: 'BBQ Ribs', calories: 1200 },
+    { name: 'Steak and Potatoes', calories: 1000 },
+    { name: 'Cheeseburger and Fries', calories: 1100 },
+    { name: 'Beef Burrito', calories: 950 },
+    { name: 'Lasagna', calories: 850 },
+    { name: 'Fried Chicken with Sides', calories: 900 },
+    { name: 'Pasta with Alfredo Sauce', calories: 600 },
+    { name: 'Chicken Alfredo', calories: 700 },
+    { name: 'Salmon with Rice', calories: 750 },
+    { name: 'Spaghetti and Meatballs', calories: 700 },
+    { name: 'Mac and Cheese', calories: 800 },
     { name: 'Peanut Butter Sandwich', calories: 300 },
+    { name: 'Avocado Toast', calories: 300 },
     { name: 'Protein Shake', calories: 400 },
     { name: 'Cheese Pizza Slice', calories: 285 },
     { name: 'Chocolate Bar', calories: 250 },
     { name: 'Burger', calories: 500 },
     { name: 'Granola Bar', calories: 200 },
-    { name: 'Bacon and Eggs', calories: 350 },
-    { name: 'Pasta with Alfredo Sauce', calories: 600 },
-    { name: 'Avocado Toast', calories: 300 },
-    { name: 'Lasagna', calories: 850 },
-    { name: 'Steak and Potatoes', calories: 1000 },
-    { name: 'Chicken Alfredo', calories: 700 },
-    { name: 'BBQ Ribs', calories: 1200 },
-    { name: 'Fried Chicken with Sides', calories: 900 },
-    { name: 'Mac and Cheese', calories: 800 },
-    { name: 'Salmon with Rice', calories: 750 },
-    { name: 'Beef Burrito', calories: 950 },
-    { name: 'Cheeseburger and Fries', calories: 1100 },
-    { name: 'Spaghetti and Meatballs', calories: 700 }
+    { name: 'Bacon and Eggs', calories: 350 }
 ];
 
 function setCalorieGoal() {
@@ -153,7 +153,11 @@ function updateMealRecommendations(hoursRemaining) {
 
     function findMealCombinations(meals, targetCalories, currentCombination) {
         if (currentCombination.length === mealsNeeded || targetCalories <= 0) {
-            recommendedMeals.push([...currentCombination]);
+            // Only accept combinations within +-200 of the target
+            const totalCalories = currentCombination.reduce((sum, meal) => sum + meal.calories, 0);
+            if (Math.abs(remainingCalories - totalCalories) <= 200) {
+                recommendedMeals.push([...currentCombination]);
+            }
             return;
         }
 
@@ -165,6 +169,9 @@ function updateMealRecommendations(hoursRemaining) {
             }
         }
     }
+
+    // Sort meal options from largest to smallest for priority
+    mealOptions.sort((a, b) => b.calories - a.calories);
 
     // Consider combinations of meals to make up the remaining calories
     findMealCombinations(mealOptions, remainingCalories, []);
