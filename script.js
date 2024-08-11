@@ -5,6 +5,7 @@ let loggedMeals = []; // Array to store logged meals with time
 let recommendedMealsHistory = []; // Array to track recommended meals
 let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
+const targetMealCount = 5; // Target total meal count
 
 // Example high-calorie meal options
 const mealOptions = [
@@ -61,13 +62,17 @@ function resetRecommendations() {
     loggedMeals = [];
     recommendedMealsHistory = [];
     document.getElementById('mealRecommendations').innerHTML = "No recommendations yet.";
+    document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
 }
 
 function updateSummary() {
     const remainingCalories = totalCalories - consumedCalories;
     document.getElementById('remainingCalories').innerText = `Remaining Calories: ${remainingCalories}`;
 
-    if (loggedMeals.length > 0) {
+    const mealsLogged = loggedMeals.length;
+    const mealsRemaining = targetMealCount - mealsLogged;
+
+    if (mealsLogged > 0) {
         const lastMealTime = loggedMeals[loggedMeals.length - 1].time;
         const endTime = new Date(lastMealTime);
         endTime.setHours(21, 0, 0); // Target end time 9 PM
@@ -77,7 +82,7 @@ function updateSummary() {
 
         document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: ${Math.round(caloriesPerHour)}`;
 
-        updateMealRecommendations(lastMealTime, endTime, hoursRemaining);
+        updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsRemaining);
     } else {
         document.getElementById('caloriesPerHour').innerText = `Calories Per Hour Required: N/A`;
     }
@@ -159,23 +164,22 @@ function updateGraph(canvasId, data, label) {
 }
 
 // Function to update meal recommendations based on remaining calories and time
-function updateMealRecommendations(lastMealTime, endTime, hoursRemaining) {
+function updateMealRecommendations(lastMealTime, endTime, hoursRemaining, mealsRemaining) {
     const remainingCalories = totalCalories - consumedCalories;
 
     // Dynamically calculate the number of meals needed based on remaining time and calories
-    let mealsNeeded = Math.max(Math.floor(hoursRemaining / 2), 1);
     let minCaloriesPerMeal = 300;
     let maxCaloriesPerMeal = 1000;
 
     let recommendedMeals = [];
 
     // Calculate the target calories per meal dynamically
-    function calculateMealTimings(mealsNeeded, remainingCalories) {
-        let targetCaloriesPerMeal = remainingCalories / mealsNeeded;
+    function calculateMealTimings(mealsRemaining, remainingCalories) {
+        let targetCaloriesPerMeal = remainingCalories / mealsRemaining;
 
-        for (let i = 0; i < mealsNeeded; i++) {
+        for (let i = 0; i < mealsRemaining; i++) {
             let mealTime = new Date(lastMealTime.getTime());
-            mealTime.setHours(lastMealTime.getHours() + Math.max(Math.floor(hoursRemaining / mealsNeeded), 1));
+            mealTime.setHours(lastMealTime.getHours() + Math.max(Math.floor(hoursRemaining / mealsRemaining), 1));
 
             // Filter out meals that have already been recommended or logged
             let suitableMeals = mealOptions.filter(meal => 
@@ -189,7 +193,7 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining) {
             if (suitableMeals.length > 0) {
                 let selectedMeal = suitableMeals[0];
                 remainingCalories -= selectedMeal.calories;
-                targetCaloriesPerMeal = remainingCalories / (mealsNeeded - (i + 1)); // Adjust target for remaining meals
+                targetCaloriesPerMeal = remainingCalories / (mealsRemaining - (i + 1)); // Adjust target for remaining meals
                 recommendedMeals.push({
                     meal: selectedMeal,
                     time: mealTime
@@ -202,20 +206,25 @@ function updateMealRecommendations(lastMealTime, endTime, hoursRemaining) {
         return recommendedMeals;
     }
 
-    recommendedMeals = calculateMealTimings(mealsNeeded, remainingCalories);
+    recommendedMeals = calculateMealTimings(mealsRemaining, remainingCalories);
 
     // Ensure a suitable meal plan is always generated
-    while (recommendedMeals.length < mealsNeeded) {
-        recommendedMeals = calculateMealTimings(Math.max(1, mealsNeeded - 1), remainingCalories);
+    while (recommendedMeals.length < mealsRemaining) {
+        recommendedMeals = calculateMealTimings(Math.max(1, mealsRemaining - 1), remainingCalories);
     }
 
     if (recommendedMeals.length > 0) {
-        let mealText = recommendedMeals.map(({ meal, time }) => 
-            `${meal.name} - ${meal.calories} calories at ${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`
-        ).join('<br>');
+        let projectedTotalCalories = consumedCalories;
+        let mealText = recommendedMeals.map(({ meal, time }) => {
+            projectedTotalCalories += meal.calories;
+            return `${meal.name} - ${meal.calories} calories at ${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
+        }).join('<br>');
+        
         document.getElementById('mealRecommendations').innerHTML = mealText;
+        document.getElementById('projectedCalories').innerText = `Projected Total Calories: ${projectedTotalCalories}`;
     } else {
         document.getElementById('mealRecommendations').innerHTML = "No suitable meal recommendations. Try logging more calories or adjusting your goal.";
+        document.getElementById('projectedCalories').innerText = "Projected Total Calories: N/A";
     }
 }
 
