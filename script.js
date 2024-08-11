@@ -49,9 +49,9 @@ function updateSummary() {
     const remainingCalories = totalCalories - consumedCalories;
     document.getElementById('remainingCalories').innerText = `Remaining Calories: ${remainingCalories}`;
 
-    // Simulate current time as 8:00 PM for testing
+    // Simulate current time as 8:00 AM for testing
     const currentTime = new Date();
-    currentTime.setHours(8, 0, 0); // 8:00 PM
+    currentTime.setHours(8, 0, 0); // 8:00 AM
 
     const endTime = new Date();
     endTime.setHours(21, 0, 0); // 9 PM today
@@ -147,7 +147,7 @@ function updateMealRecommendations(hoursRemaining) {
     const mealsNeeded = Math.ceil(hoursRemaining / 2);
 
     // Calculate the target calories per meal
-    const targetCaloriesPerMeal = remainingCalories / mealsNeeded;
+    let targetCaloriesPerMeal = remainingCalories / mealsNeeded;
 
     let recommendedMeals = [];
 
@@ -173,8 +173,14 @@ function updateMealRecommendations(hoursRemaining) {
     // Sort meal options from largest to smallest for priority
     mealOptions.sort((a, b) => b.calories - a.calories);
 
-    // Consider combinations of meals to make up the remaining calories
-    findMealCombinations(mealOptions, remainingCalories, []);
+    // Attempt to find combinations that meet the target calories per meal
+    findMealCombinations(mealOptions, targetCaloriesPerMeal * mealsNeeded, []);
+
+    if (recommendedMeals.length === 0) {
+        // Fallback: If no suitable combinations found, relax the requirements
+        targetCaloriesPerMeal = remainingCalories / Math.max(1, mealsNeeded);
+        findMealCombinations(mealOptions, targetCaloriesPerMeal * mealsNeeded, []);
+    }
 
     if (recommendedMeals.length > 0) {
         // Sort combinations by the number of meals (fewer meals is preferred) and by calories closest to target
