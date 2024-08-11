@@ -1,6 +1,7 @@
 let totalCalories = 3500; // Default goal set to 3500 calories
 let consumedCalories = 0;
 let calorieData = []; // Array to store calorie intake data
+let loggedMeals = []; // Array to store logged meals with time
 let weightData = []; // Array to store weight data
 let timePeriod = 'week'; // Default time period for the graphs
 
@@ -38,8 +39,15 @@ function setCalorieGoal() {
 function addCalories() {
     const input = document.getElementById('caloriesInput').value;
     if (input) {
+        const currentTimeInput = document.getElementById('currentTimeInput').value;
+        const currentTime = new Date();
+        const [hours, minutes] = currentTimeInput.split(':');
+        currentTime.setHours(parseInt(hours), parseInt(minutes), 0);
+
         consumedCalories += parseInt(input);
         calorieData.push(consumedCalories);
+        loggedMeals.push({ time: currentTime, calories: parseInt(input) });
+
         updateSummary();
         updateGraphs();
     }
@@ -157,9 +165,11 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
         let targetCaloriesPerMeal = remainingCalories / mealsNeeded;
 
         // Adjust meal frequency dynamically based on time left and calories remaining
+        let lastMealTime = loggedMeals.length > 0 ? loggedMeals[loggedMeals.length - 1].time : currentTime;
+
         for (let i = 0; i < mealsNeeded; i++) {
-            let mealTime = new Date(currentTime.getTime());
-            mealTime.setHours(currentTime.getHours() + i * (hoursRemaining / mealsNeeded));
+            let mealTime = new Date(lastMealTime.getTime());
+            mealTime.setHours(lastMealTime.getHours() + Math.max(Math.floor(hoursRemaining / mealsNeeded), 1));
 
             let suitableMeals = mealOptions.filter(meal => meal.calories >= minCaloriesPerMeal && meal.calories <= maxCaloriesPerMeal);
             suitableMeals.sort((a, b) => Math.abs(a.calories - targetCaloriesPerMeal) - Math.abs(b.calories - targetCaloriesPerMeal));
@@ -172,6 +182,7 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
                     meal: selectedMeal,
                     time: mealTime
                 });
+                lastMealTime = mealTime; // Update last meal time
             }
         }
 
