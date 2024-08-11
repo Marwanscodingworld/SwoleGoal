@@ -38,31 +38,25 @@ function setCalorieGoal() {
 }
 
 function addCalories() {
-    const input = document.getElementById('caloriesInput').value;
-    if (input) {
-        const currentTimeInput = document.getElementById('currentTimeInput').value;
-        const currentTime = new Date();
-        const [hours, minutes] = currentTimeInput.split(':');
-        currentTime.setHours(parseInt(hours), parseInt(minutes), 0);
+    const inputCalories = document.getElementById('caloriesInput').value;
+    const inputTime = document.getElementById('timeInput').value;
+    if (inputCalories && inputTime) {
+        const inputTimeDate = new Date();
+        const [hours, minutes] = inputTime.split(':');
+        inputTimeDate.setHours(parseInt(hours), parseInt(minutes), 0);
 
-        consumedCalories += parseInt(input);
+        consumedCalories += parseInt(inputCalories);
         calorieData.push(consumedCalories);
-        loggedMeals.push({ time: currentTime, calories: parseInt(input) });
+        loggedMeals.push({ time: inputTimeDate, calories: parseInt(inputCalories) });
 
-        updateSummary();
+        updateSummary(inputTimeDate);
         updateGraphs();
     }
 }
 
-function updateSummary() {
+function updateSummary(currentTime) {
     const remainingCalories = totalCalories - consumedCalories;
     document.getElementById('remainingCalories').innerText = `Remaining Calories: ${remainingCalories}`;
-
-    // Use the current time from the input box
-    const currentTimeInput = document.getElementById('currentTimeInput').value;
-    const currentTime = new Date();
-    const [hours, minutes] = currentTimeInput.split(':');
-    currentTime.setHours(parseInt(hours), parseInt(minutes), 0);
 
     // Set the target end time between 7 PM and 9 PM
     const endTime = new Date();
@@ -80,7 +74,7 @@ function handleWorkout() {
     const workedOut = document.getElementById('workoutCheck').checked;
     if (workedOut) {
         totalCalories += 300; // Example adjustment, can be dynamic
-        updateSummary();
+        updateSummary(new Date()); // Use the current date for time update
     }
 }
 
@@ -217,4 +211,4 @@ function updateMealRecommendations(currentTime, endTime, hoursRemaining) {
 
 // Initial graphs and recommendations rendering
 updateGraphs();
-updateSummary(); // Ensure summary is updated on page load
+updateSummary(new Date()); // Ensure summary is updated on page load
