@@ -42,7 +42,7 @@ function updateSummary() {
 
     const currentTime = new Date();
     const endTime = new Date();
-    endTime.setHours(21, 0, 0); // 9 PM today
+    endTime.setHours(24, 0, 0); // 9 PM today
 
     const hoursRemaining = (endTime - currentTime) / (1000 * 60 * 60);
     const caloriesPerHour = (remainingCalories > 0) ? remainingCalories / hoursRemaining : 0;
