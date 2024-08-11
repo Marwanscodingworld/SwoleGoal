@@ -258,6 +258,25 @@ function updateMealLogTable() {
         row.appendChild(timeCell);
 
         tableBody.appendChild(row);
+        // Calculate total calories
+let totalCaloriesLogged = loggedMeals.reduce((total, meal) => total + meal.calories, 0);
+
+// Create and append a row for the total calories
+const totalRow = document.createElement('tr');
+const totalLabelCell = document.createElement('td');
+totalLabelCell.innerText = 'Total';
+totalLabelCell.colSpan = 2;
+const totalCaloriesCell = document.createElement('td');
+totalCaloriesCell.innerText = totalCaloriesLogged;
+totalCaloriesCell.colSpan = 2;
+
+// Append the cells to the row
+totalRow.appendChild(totalLabelCell);
+totalRow.appendChild(totalCaloriesCell);
+
+// Append the total row to the table body
+tableBody.appendChild(totalRow);
+
     });
 }
 
